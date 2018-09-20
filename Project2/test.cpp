@@ -1,18 +1,19 @@
 #include "branch_limit.h"
 
 #include <iostream>
+#include <math.h>  
 using namespace std;
 #include <stdlib.h>  
 
 double c = 30;
-const int n = 3;
+const int n = 4;
 
 double *w;
 double *p;
 double cw;
 double cp;
 
-int    *bestX;
+int     *bestX;
 MaxHeap *heap;
 
 //上界函数bound计算结点所相应价值的上界  
@@ -32,18 +33,18 @@ double bound(int i)
 }
 
 //addLiveNode将一个新的活结点插入到子集树和优先队列中  
-void addLiveNode(double up, double pp, double ww, int lev, BBnode* par, bool ch)
+void addLiveNode(double up, double pp, double ww, int lev, PTNode* par, bool ch)
 {
 	//将一个新的活结点插入到子集树和最大堆中  
-	BBnode *b = new BBnode(par, ch);
-	HeapNode  node = HeapNode(b, up, pp, ww, lev);
+	PTNode *b = new PTNode(par, ch);
+	HeapNode<double> *node = &(HeapNode<double>(b, up, pp, ww, lev));
 	heap->put(node);
 }
 
 double MaxKnapsack()
 {
 	//优先队列式分支限界法，返回最大价值，bestx返回最优解  
-	BBnode * enode = new BBnode();
+	PTNode * enode = new PTNode();
 	int i = 1;
 	double bestp = 0;//当前最优值  
 	double up = bound(1);//当前上界  
@@ -58,7 +59,8 @@ double MaxKnapsack()
 		up = bound(i + 1);
 		if (up >= bestp)
 			addLiveNode(up, cp, cw, i + 1, enode, false);
-		HeapNode node = heap->removeMax();
+		HeapNode<double> node;
+		heap->removeMax(&node);
 		enode = node.liveNode;
 		cw = node.weight;
 		cp = node.profit;

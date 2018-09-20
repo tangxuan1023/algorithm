@@ -1,57 +1,68 @@
 #ifndef __BRANCH_LIMIT_H__
 #define __BRANCH_LIMIT_H__
 
-#include <math.h>  
-
-class BBnode {
+class PTNode {
 public:
-	BBnode *parent;
+	PTNode(PTNode *par, bool ch) :parent(par), leftChild(ch) {}
+	PTNode() {}
+	~PTNode() {}
+public:
+	PTNode *parent;
 	bool leftChild;   //左子节点标志  
-	BBnode(BBnode *par, bool ch);
-	BBnode();
-	~BBnode();
 };
 
+template<typename T>
 class HeapNode {
 public:
-	BBnode* liveNode; // 活结点  
-	double  upperProfit; //价值上界  
-	double  profit; //价值  
-	double  weight; //重量  
-	int     level; // 活结点在子集树中所处的层次  
-	HeapNode(BBnode *node, double up, double pp, double ww, int lev);
-	HeapNode();
-	~HeapNode();
-	int compareTo(HeapNode o);
+	HeapNode(PTNode *node, T up, T pp, T ww, int lev) :
+		liveNode(node), upperProfit(up),
+		profit(pp), weight(ww), level(lev) {}
+	HeapNode() {}
+	~HeapNode() {}
+
+	int compareTo(HeapNode node)
+	{
+		T xup = node.upperProfit;
+		if (upperProfit < xup) return -1;
+		else if (upperProfit == xup) return 0;
+		else return 1;
+	}
+
+public:
+	PTNode *liveNode;
+	int level;
+	T upperProfit;
+	T profit;
+	T weight;
 };
 
 class Element
 {
-private:
-	double d;
 public:
-	int id;
-	Element();
-	Element(int idd, double dd);
-	~Element();
+	Element(int idd, double dd):id(idd), d(dd){}
+	Element() {}
+	~Element() {}
 	int compareTo(Element x);
 	bool equals(Element x);
+
+public:
+	int id;
+
+private:
+	double d;
 };
 
 class MaxHeap {
-private:
-	HeapNode *nodes;
-	int nextPlace;
-	int maxNumber;
-	void buildMaxHeapImpl(HeapNode *nodes, int len);
 public:
 	MaxHeap(int n);
 	MaxHeap();
 	~MaxHeap();
-	void put(HeapNode node);
-	HeapNode removeMax();
-	void heapAdjust(HeapNode *nodes, int s, int m);
-	void buildMaxHeap(HeapNode *nodes);	
+	void put(const HeapNode<double> *node);
+	void removeMax(HeapNode<double> *node);
+private:
+	HeapNode<double> *nodes;
+	int nextPlace;
+	int maxNumber;
 };
 
 int branch_limit_main();
