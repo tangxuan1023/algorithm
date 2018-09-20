@@ -20,8 +20,7 @@ public:
 	HeapNode() {}
 	~HeapNode() {}
 
-	int compareTo(HeapNode node)
-	{
+	int compareTo(HeapNode node){
 		T xup = node.upperProfit;
 		if (upperProfit < xup) return -1;
 		else if (upperProfit == xup) return 0;
@@ -42,13 +41,12 @@ public:
 	Element(int idd, double dd):id(idd), d(dd){}
 	Element() {}
 	~Element() {}
-	int compareTo(Element x);
-	bool equals(Element x);
+	/*int compareTo(Element x);
+	bool equals(Element x);*/
+	//void sort();
 
 public:
-	int id;
-
-private:
+	int id;	
 	double d;
 };
 
@@ -63,6 +61,30 @@ private:
 	HeapNode<double> *nodes;
 	int nextPlace;
 	int maxNumber;
+};
+
+typedef struct _attributes_param_s {
+	double capacity;
+	int table_size;
+	double *weight_table;
+	double *profit_table;
+	double current_usage;
+	double current_profit;
+}attributes_param_t;
+
+class BackPack {
+public:
+	BackPack();
+	~BackPack();
+	double bound(int i);
+	void addLiveNode(double up, double pp, double ww, int lev, PTNode* par, bool ch);
+	double MaxKnapsack();
+	double knapsack(double *pp, double *ww, double cc, int *xx);
+
+private:
+	int     *bestX;
+	MaxHeap *heap;
+	attributes_param_t params;
 };
 
 int branch_limit_main();

@@ -119,7 +119,7 @@ void test4()
 {
 	int arr[] = { 16,7,3,20,17,8,15,1,5 };
 	int n = sizeof(arr) / sizeof(arr[0]);
-	HeapSort(arr, n);
+	quickSort(arr, n);
 	for (int i = 0; i < n; i++) {
 		printf("%d\n", arr[i]);
 	}

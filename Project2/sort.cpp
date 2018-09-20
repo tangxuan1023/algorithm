@@ -73,9 +73,9 @@ int partition(int *arr, int size)
 
 	for (;;) {
 		//do j--; while (arr[j] > key);
-		while (arr[j] > key) j--;
+		while (arr[j] < key) j--; // Éý½µÐò¿ØÖÆ
 		//do i++; while (i <= high && arr[i] < key);
-		while (i < size && arr[i] < key) i++;
+		while (i < size && arr[i] > key) i++; // Éý½µÐò¿ØÖÆ
 		if (i >= j) break;
 		swap<int>(arr[i], arr[j]);
 	}
