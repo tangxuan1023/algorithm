@@ -1,4 +1,5 @@
 #include "algo.h"
+#include "branch_limit.h"
 #include <stdio.h>
 #include <string.h>
 typedef struct tagPoint {
@@ -16,7 +17,8 @@ typedef char* charp;
 int main()
 {
 	//test3();
-	test4();
+	//test4();
+	branch_limit_main();
 	getchar();
 	return 0;
 }

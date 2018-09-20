@@ -153,7 +153,9 @@ void AdjustDown(int *arr, int i, int len)
 {
 	int temp = arr[i];  // 暂存A[i]
 
-	for (int k = 2 * i + 1; k < len; k = 2 * k + 1){
+	for (int k = 2 * i + 1; k < len; k = 2 * k + 1){ 
+		// 调整节点，使子树根节点值最大（大根堆 ki >= k(2i）且 ki>= k(2i+1)）
+		// k = 2 * i + 1、k = 2 * k + 1，即对应数组下标从 0 开始的调整
 		if (k != len - 1 && arr[k + 1] > arr[k])
 			++k;
 		if (temp < arr[k]){
@@ -167,7 +169,8 @@ void AdjustDown(int *arr, int i, int len)
 }
 void BuildMaxHeap(int *arr, int len)
 {
-	for (int i = len / 2 - 1; i >= 0; --i) // -1 对应数组下标
+	// 数组长度等于序列长度 len，第 0 元素对应建堆的序列第一项，因此 -1 对应数组下标
+	for (int i = len / 2 - 1; i >= 0; --i) 
 		AdjustDown(arr, i, len);
 }
 void HeapSort(int *arr, int n)
@@ -179,3 +182,4 @@ void HeapSort(int *arr, int n)
 		AdjustDown(arr, 0, i);
 	}
 }
+
