@@ -6,16 +6,19 @@ using namespace std;
 int branch_limit_main()
 {
 	double c = 30;
-	int n = 4;
+	int n = 3;
 	double *p = new double[5];
 	p[0] = 0; p[1] = 45; p[2] = 25; p[3] = 25; p[4] = 30;
 
 	double *w = new double[5];
 	w[0] = 0; w[1] = 16; w[2] = 15; w[3] = 15; w[4] = 15;
 
-	int *x = new int[5];
+	int *x = new int[n];
 	BackPack bp;
-	double m = bp.knapsack(p, w, c, x);
+	bp.init(c, n, w, p);
+	double m = 0; 
+	bp.knapsack(x);
+	//bp.getBestInfo(m, x);
 
 	cout << "*****0-1*****" << endl;
 	cout << "n=" << n << endl;

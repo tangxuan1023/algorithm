@@ -11,6 +11,7 @@ void test1();
 void test2();
 void test3();
 void test4();
+void test5();
 
 typedef char* charp;
 
@@ -19,6 +20,7 @@ int main()
 	//test3();
 	//test4();
 	branch_limit_main();
+	//test5();
 	getchar();
 	return 0;
 }
@@ -117,10 +119,25 @@ void test3()
 
 void test4()
 {
-	int arr[] = { 16,7,3,20,17,8,15,1,5 };
+	int arr[] = { 16,15,17,16,17,15,15,17,15 };
 	int n = sizeof(arr) / sizeof(arr[0]);
 	quickSort(arr, n);
 	for (int i = 0; i < n; i++) {
 		printf("%d\n", arr[i]);
 	}
+}
+
+void test5()
+{
+	double d1 = 4.0000005;
+	double d2 = 4.0000001;
+	if (d1 > d2) {
+		printf("Hello %lf\n", 10e-7);
+		return;
+	}
+	else if (d1 == d2) {
+		printf("hello\n");
+		return;
+	}
+	printf("this branch\n");
 }

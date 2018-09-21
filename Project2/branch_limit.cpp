@@ -1,6 +1,7 @@
 #include "branch_limit.h"
 #include <math.h>  
 #include <stdlib.h>
+#include <string.h>
 
 // template
 template<typename T>
@@ -48,60 +49,41 @@ void putImpl(const HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
 }
 
 template<typename T>
-void removeMaxImpl(HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
+void peekMaxImpl(HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
 {
-	HeapNode<T> tmpNode = nodes[1];
+	HeapNode<T> tmp_node = nodes[1];
 	nodes[1] = nodes[--(*pi)];
 	buildMaxHeap(nodes, *pi);
-	*node = tmpNode;
+	*node = tmp_node;
 }
-
 
 // TODO(tangxuan): key-value swap based value
-void _swap(Element &a, Element &b)
+template <typename T>
+static void _swap(KeyValuePair<T> &a, KeyValuePair<T> &b)
 {
-	double tmp = a.d;
-	a.d = b.d;
-	b.d = tmp;
+	T tmp_v = a.value;
+	a.value = b.value;
+	b.value = tmp_v;
 
-	int tmp1 = a.id;
+	int tmp_k = a.key;
 
-	a.id = b.id;
-	b.id = tmp1;
+	a.key = b.key;
+	b.key = tmp_k;
 }
 
-
-// class interface
-//int Element::compareTo(Element x)
-//{
-//	double xd = x.d;
-//	if (d < xd)return -1;
-//	if (d == xd)return 0;
-//	return 1;
-//}
-//
-//bool Element::equals(Element x)
-//{
-//	return d == x.d;
-//}
-
-//typedef int (*pf_compare)(const void *a, const void *b);
-//
-//int compare(const void *a, const void *b)
-//{
-//	return (*(double*)b > *(double*)a);
-//}
-
-int partition(Element *arr, int size/*, pf_compare cmp*/)
+template <typename T>
+int partition(KeyValuePair<T> *arr, int size, pfunc_compare pf_cmp)
 {
 	if (size < 2) return 0;
-	double key = arr[0].d;
+	T datum = arr[0].value; //datum
 	int i = 1;
 	int j = size - 1;
 
 	for (;;) {
-		while (arr[j].d < key) j--; // descend sort
-		while (i < j && arr[i].d > key) i++;
+		//while (arr[j].d < key) j--; // descend sort
+		//while (i < j && (arr[i].d > key || fabs(arr[i].d - key)< 10e-6)) i++;
+		while (pf_cmp(&datum, &arr[j].value)) j--; // descend sort
+		while (i < j && !pf_cmp(&datum, &arr[i].value)) i++;
 		if (i >= j) break;
 		_swap(arr[i], arr[j]);
 	}
@@ -111,22 +93,19 @@ int partition(Element *arr, int size/*, pf_compare cmp*/)
 }
 
 // TODO(tangxuan): key-value quick sort based value
-void quickSort(Element *arr, int size)
+template <typename T>
+void quickSort(KeyValuePair<T> *arr, int size, pfunc_compare pf_cmp)
 {
 	if (size < 2) return;
-	int pos = partition(arr, size/*, &compare*/);
-	quickSort(arr, pos);
-	quickSort(arr + pos + 1, size - pos - 1);
+	int pos = partition(arr, size, pf_cmp);
+	quickSort(arr, pos, pf_cmp);
+	quickSort(arr + pos + 1, size - pos - 1, pf_cmp);
 }
 
-void descend_sort(Element *arr, int size)
-{
-	quickSort(arr, size);
-}
-
+// class MaxHeap
 MaxHeap::MaxHeap(int n)
 {
-	maxNumber = pow((double)2, (double)n);
+	maxNumber = (int)pow((double)2, (double)n);
 	nextPlace = 1;
 	nodes = new HeapNode<double>[maxNumber];
 }
@@ -138,7 +117,7 @@ MaxHeap::MaxHeap()
 MaxHeap::~MaxHeap()
 {
 	if (nodes) {
-		delete nodes;
+		delete[] nodes;
 		nodes = NULL;
 	}
 }
@@ -148,124 +127,173 @@ void MaxHeap::put(const HeapNode<double> *node)
 	putImpl(node, &nextPlace, nodes);
 }
 
-void MaxHeap::removeMax(HeapNode<double> *node)
+void MaxHeap::peekMax(HeapNode<double> *node)
 {
-	removeMaxImpl(node, &nextPlace, nodes);
+	peekMaxImpl(node, &nextPlace, nodes);
 }
 
-
-// class BackPack function
-BackPack::BackPack() 
-{ 
-	/*double w_t[] = { 0, 16, 15, 15, 15 };
-	double p_t[] = { 0, 45, 25, 25, 30 };
-
-	params = { 30, 4, w_t, p_t, 0, 0 };
-	bestX = new int[params.table_size];
-	heap = new MaxHeap(params.table_size); */
-}
-
-BackPack::~BackPack() 
+// class BackPack 
+BackPack::BackPack() :
+	mpBestX(NULL), mdBestP(0.0), mpHeap(NULL)
 {
-	/*if (bestX) {
-		delete bestX;
-		bestX = NULL;
-	}
-	if (heap) {
-		delete heap;
-		heap = NULL;
-	}*/
+	memset(&mObjParams, 0, sizeof(attributes_param_t));
 }
- 
+
+BackPack::~BackPack()
+{
+	deinit();
+}
+
 double BackPack::bound(int i)
 {
-	int n = params.table_size;
-	double cleft = params.capacity - params.current_usage;
-	double b = params.current_profit;
-	while (i <= n && params.weight_table[i] <= cleft) {
-		cleft = cleft - params.weight_table[i];
-		b = b + params.profit_table[i];
+	int n = mObjParams.count;
+	double cremain = mObjParams.capacity - mObjParams.curr_usage;
+	double pro = mObjParams.curr_profit;
+	while (i <= n && mObjParams.weight_table[i] <= cremain) {
+		cremain -= mObjParams.weight_table[i];
+		pro += mObjParams.profit_table[i];
 		i++;
 	}
 
 	if (i <= n)
-		b = b + params.profit_table[i] / params.weight_table[i] * cleft;
-	return b;
+		pro += mObjParams.profit_table[i] / mObjParams.weight_table[i] * cremain;
+	return pro;
 }
-  
-void BackPack::addLiveNode(double up, double pp, double ww, int lev, PTNode* par, bool ch)
+
+static int compare(const void *a, const void *b)
 {
-	PTNode *b = new PTNode(par, ch);
-	HeapNode<double> *node = &(HeapNode<double>(b, up, pp, ww, lev));
-	heap->put(node);
+	return (*(double*)a > *(double*)b);
+}
+
+void BackPack::descendSort(Element *arr, int len)
+{
+	quickSort((KeyValuePair<double>*)arr, len, &compare);
+}
+
+void BackPack::addLiveNode(double up, double p, double w, int lev, PTNode *par, bool ch)
+{
+	PTNode *pt_node = new PTNode(par, ch);  // TODO(tangxuan): delete this space
+	HeapNode<double> *heap_node = &(HeapNode<double>(pt_node, up, p, w, lev));
+	mpHeap->put(heap_node);
 }
 
 double BackPack::MaxKnapsack()
 {
-	int n = params.table_size;
-	PTNode * enode = new PTNode();
+	int n = mObjParams.count;
+	PTNode *enode = new PTNode();
 	int i = 1;
-	double bestp = 0;  
-	double up = bound(1); 
-	while (i != n + 1) { 
-		double wt = params.current_usage + params.weight_table[i];
-		if (wt <= params.capacity) {
-			if (params.current_profit + params.profit_table[i] > bestp)
-				bestp = params.current_profit + params.profit_table[i];
-			addLiveNode(up, params.current_profit + params.profit_table[i],
-				params.current_usage + params.weight_table[i], i + 1, enode, true);
+	double bestp = 0;
+	double up = bound(1);
+	while (i != n + 1) {
+		double wt = mObjParams.curr_usage + mObjParams.weight_table[i];
+		if (wt <= mObjParams.capacity) {
+			double tmp_bestp = mObjParams.curr_profit + mObjParams.profit_table[i];
+			if (tmp_bestp > bestp) {
+				bestp = tmp_bestp;
+			}
+			addLiveNode(up, tmp_bestp, mObjParams.curr_usage + mObjParams.weight_table[i], i + 1, enode, true);
 		}
+
 		up = bound(i + 1);
-		if (up >= bestp)
-			addLiveNode(up, params.current_profit, params.current_usage, i + 1, enode, false);
+		if (up >= bestp) {
+			addLiveNode(up, mObjParams.curr_profit, mObjParams.curr_usage, i + 1, enode, false);
+		}
+
+		// get the max info from the node heep
 		HeapNode<double> node;
-		heap->removeMax(&node);
+		mpHeap->peekMax(&node);
 		enode = node.liveNode;
-		params.current_usage = node.weight;
-		params.current_profit = node.profit;
+		mObjParams.curr_usage = node.weight;
+		mObjParams.curr_profit = node.profit;
 		up = node.upperProfit;
 		i = node.level;
-	}
-	for (int j = n; j > 0; j--) {
+	} // end while loop
 
-		bestX[j] = (enode->leftChild) ? 1 : 0;
+	for (int j = n; j > 0; j--) {
+		mpBestX[j] = (enode->leftChild) ? 1 : 0;
 		enode = enode->parent;
 	}
-	return params.current_profit;
+	
+	delete enode;
+	return mObjParams.curr_profit;
 }
 
-double BackPack::knapsack(double *pp, double *ww, double cc, int *xx)
-{ 
-	int c = params.capacity = cc; 
-	int n = params.table_size = 4;
-	Element *q = new Element[n];
-	double ws = 0.0;
-	double ps = 0.0;
-	q[0] = { 0,0 };
-	for (int i = 0; i < n; i++) {
-		q[i] = Element(i + 1, pp[i + 1] / ww[i + 1]);
-		ps = ps + pp[i + 1];
-		ws = ws + ww[i + 1];
-	}
-	if (ws <= c) {
-		return  ps;
-	}
-	// sort the array q, based q[i].d 
-	descend_sort(q, 4);
+int BackPack::init(double cap, int count, double *w_t, double *p_t)
+{
+	// init params
+	mObjParams = { cap, count, w_t, p_t, 0.0, 0.0};
+	mpBestX = new int[mObjParams.count + 1]();
+	return 0;
+}
 
-	params.profit_table = new double[n + 1];
-	params.weight_table = new double[n + 1];
-	for (int i = 0; i < n; i++) {
-		params.profit_table[i + 1] = pp[q[i].id];
-		params.weight_table[i + 1] = ww[q[i].id];
+int BackPack::deinit()
+{
+	if (mpBestX) {
+		delete[] mpBestX;
+		mpBestX = NULL;
 	}
-	params.current_usage = 0.0;
-	params.current_profit = 0.0;
-	bestX = new int[n + 1];
-	heap = new MaxHeap(n);
-	double bestp = MaxKnapsack();
-	for (int j = 0; j < n; j++)
-		xx[q[j].id] = bestX[j + 1];
+	if (mObjParams.profit_table) {
+		delete[] mObjParams.profit_table;
+		mObjParams.profit_table = NULL;
+	}
+	if (mObjParams.weight_table) {
+		delete[] mObjParams.weight_table;
+		mObjParams.weight_table = NULL;
+	}
+	if (mpHeap) {
+		delete mpHeap;
+		mpHeap = NULL;
+	}
 
-	return  bestp;
+	return 0;
+}
+
+double BackPack::knapsack(int *bestx)
+{
+	do {
+		double c = mObjParams.capacity;
+		double *p = mObjParams.profit_table;
+		double *w = mObjParams.weight_table;
+		int n = mObjParams.count;
+		Element *ratio = new Element[n]();
+		// should it's compute
+		bool compute_flag = true;
+
+		double ws = 0.0;
+		double ps = 0.0;
+		for (int i = 0; i < n; i++) {
+			ratio[i] = Element(i + 1, p[i + 1] / w[i + 1]);
+			ps = ps + p[i + 1];
+			ws = ws + w[i + 1];
+		}
+
+		if (ws <= c) {  // all goods can put in
+			for (int j = 0; j < n; j++) {
+				if (mpBestX) mpBestX[j] = 1;
+			}
+			mdBestP = ps;
+			compute_flag = false;
+		}
+
+		if (compute_flag) {
+			mObjParams.profit_table = new double[n + 1]();
+			mObjParams.weight_table = new double[n + 1]();
+			mpHeap = new MaxHeap(n);
+
+			descendSort(ratio, n);
+			for (int i = 0; i < n; i++) {
+				mObjParams.profit_table[i + 1] = p[ratio[i].key];
+				mObjParams.weight_table[i + 1] = w[ratio[i].key];
+			}
+			mdBestP = MaxKnapsack();
+
+			// TODO(tangxuan): bestX
+			for (int i = 0; i < n; i++) {
+				bestx[ratio[i].key] = mpBestX[i + 1];
+			}
+		}
+		delete[] ratio;
+	} while (0);
+
+	return mdBestP;
 }

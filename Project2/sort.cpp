@@ -75,7 +75,7 @@ int partition(int *arr, int size)
 		//do j--; while (arr[j] > key);
 		while (arr[j] < key) j--; // Éý½µÐò¿ØÖÆ
 		//do i++; while (i <= high && arr[i] < key);
-		while (i < size && arr[i] > key) i++; // Éý½µÐò¿ØÖÆ
+		while (i < size && arr[i] >= key) i++; // Éý½µÐò¿ØÖÆ
 		if (i >= j) break;
 		swap<int>(arr[i], arr[j]);
 	}
@@ -124,7 +124,6 @@ void quick_sort(int *arr, int size)
 
 void bubbleSort(int *arr, int size)
 {
-	int i, j;
 	for (int i = size - 1; i > 0; i--) {
 		for (int j = 0; j < i; j++) {
 			if (arr[j] > arr[j + 1]) {
@@ -136,7 +135,6 @@ void bubbleSort(int *arr, int size)
 
 void bubbleSort2(int *arr, int size)
 {
-	int i, j;
 	int change = 1;
 	for (int i = size - 1; i > 1 && change; i--) {
 		change = 0;

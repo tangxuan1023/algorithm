@@ -8,24 +8,17 @@ public:
 	~PTNode() {}
 public:
 	PTNode *parent;
-	bool leftChild;   //左子节点标志  
+	bool leftChild;   //the flag of left child  
 };
 
 template<typename T>
 class HeapNode {
 public:
-	HeapNode(PTNode *node, T up, T pp, T ww, int lev) :
+	HeapNode(PTNode *node, T up, T p, T w, int lev) :
 		liveNode(node), upperProfit(up),
-		profit(pp), weight(ww), level(lev) {}
+		profit(p), weight(w), level(lev) {}
 	HeapNode() {}
 	~HeapNode() {}
-
-	int compareTo(HeapNode node){
-		T xup = node.upperProfit;
-		if (upperProfit < xup) return -1;
-		else if (upperProfit == xup) return 0;
-		else return 1;
-	}
 
 public:
 	PTNode *liveNode;
@@ -35,19 +28,17 @@ public:
 	T weight;
 };
 
-class Element
+template<typename T>
+class KeyValuePair
 {
 public:
-	Element(int idd, double dd):id(idd), d(dd){}
-	Element() {}
-	~Element() {}
-	/*int compareTo(Element x);
-	bool equals(Element x);*/
-	//void sort();
+	KeyValuePair(int k, T v):key(k), value(v){}
+	KeyValuePair() {}
+	~KeyValuePair() {}
 
 public:
-	int id;	
-	double d;
+	int key;	  // key
+	T value;  // value, template
 };
 
 class MaxHeap {
@@ -56,7 +47,7 @@ public:
 	MaxHeap();
 	~MaxHeap();
 	void put(const HeapNode<double> *node);
-	void removeMax(HeapNode<double> *node);
+	void peekMax(HeapNode<double> *node);
 private:
 	HeapNode<double> *nodes;
 	int nextPlace;
@@ -65,27 +56,36 @@ private:
 
 typedef struct _attributes_param_s {
 	double capacity;
-	int table_size;
+	int count;
 	double *weight_table;
 	double *profit_table;
-	double current_usage;
-	double current_profit;
+	double curr_usage;
+	double curr_profit;
 }attributes_param_t;
 
+typedef KeyValuePair<double> Element;
 class BackPack {
 public:
 	BackPack();
 	~BackPack();
-	double bound(int i);
-	void addLiveNode(double up, double pp, double ww, int lev, PTNode* par, bool ch);
-	double MaxKnapsack();
-	double knapsack(double *pp, double *ww, double cc, int *xx);
+	int init(double cap, int count, double *w_t, double *p_t);
+	int deinit();
+	double knapsack(int *bestx);
 
 private:
-	int     *bestX;
-	MaxHeap *heap;
-	attributes_param_t params;
+	double bound(int i);
+	void descendSort(Element *arr, int len);
+	void addLiveNode(double up, double p, double w, int lev, PTNode *par, bool ch);
+	double MaxKnapsack();
+
+private:
+	int     *mpBestX;
+	double   mdBestP;
+	MaxHeap *mpHeap;
+	attributes_param_t mObjParams;
 };
+
+typedef int(*pfunc_compare)(const void *a, const void *b);
 
 int branch_limit_main();
 #endif // __BRANCH_LIMIT_H__
