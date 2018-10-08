@@ -49,7 +49,7 @@ void putImpl(const HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
 }
 
 template<typename T>
-void peekMaxImpl(HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
+void peekImpl(HeapNode<T> *node, int *pi, HeapNode<T> *nodes)
 {
 	HeapNode<T> tmp_node = nodes[1];
 	nodes[1] = nodes[--(*pi)];
@@ -127,9 +127,9 @@ void MaxHeap::put(const HeapNode<double> *node)
 	putImpl(node, &nextPlace, nodes);
 }
 
-void MaxHeap::peekMax(HeapNode<double> *node)
+void MaxHeap::peek(HeapNode<double> *node)
 {
-	peekMaxImpl(node, &nextPlace, nodes);
+	peekImpl(node, &nextPlace, nodes);
 }
 
 // class BackPack 
@@ -173,7 +173,7 @@ void BackPack::descendSort(Element *arr, int len)
 void BackPack::addLiveNode(double up, double p, double w, int lev, PTNode *par, bool ch)
 {
 	PTNode *pt_node = new PTNode(par, ch);  // TODO(tangxuan): delete this space
-	HeapNode<double> *heap_node = &(HeapNode<double>(pt_node, up, p, w, lev));
+	HeapNode<double> *heap_node = &(HeapNode<double>(pt_node, up, p, w, lev)); // error: taking address of temporary 
 	mpHeap->put(heap_node);
 }
 
@@ -201,7 +201,7 @@ double BackPack::MaxKnapsack()
 
 		// get the max info from the node heep
 		HeapNode<double> node;
-		mpHeap->peekMax(&node);
+		mpHeap->peek(&node);
 		enode = node.liveNode;
 		mObjParams.curr_usage = node.weight;
 		mObjParams.curr_profit = node.profit;
