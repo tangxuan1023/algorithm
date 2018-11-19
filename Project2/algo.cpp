@@ -246,50 +246,40 @@ int getMNS(int π[], int n)
 }
 
 /* 过滤重复的及其他非字母数字的字符 */
-// TODO: 待优化
 char *filter(char *str, int len)
 {
     char *cp = str;
-    int filter1[10] = { 0 };
-    int filter2[26] = { 0 };
-    int filter3[26] = { 0 };
+    int flags[10 + 26 + 26] = { 0 };
+    int len1 = 10;
+    int len2 = 26;
+    int len3 = 26;
 
     while (*cp != '\0') {
         if (*cp >= '0' && *cp <= '9') {
-            filter1[*cp - '0'] = 1;
+            flags[*cp - '0'] = 1;
         }
         if (*cp >= 'A' && *cp <= 'Z') {
-            filter2[*cp - 'A'] = 1;
+            flags[*cp - 'A' + len1] = 1;
         }
         if (*cp >= 'a' && *cp <= 'z') {
-            filter3[*cp - 'a'] = 1;
+            flags[*cp - 'a' + len1 + len2] = 1;
         }
         cp++;
     }
-    ;
 
     char *ret = new char[len + 1]();
     int i = 0;
     int k = 0;
-    while (i < 10) {
-        if (filter1[i] == 1) {
-            ret[k++] = i + '0';
-        }
-        ++i;
-    }
-
-    i = 0;
-    while (i < 26) {
-        if (filter2[i] == 1) {
-            ret[k++] = i + 'A';
-        }
-        ++i;
-    }
-
-    i = 0;
-    while (i < 26) {
-        if (filter3[i] == 1) {
-            ret[k++] = i + 'a';
+    while (i < len1 + len2 + len3) {
+        if (flags[i] == 1) {
+            if (i < len1)
+                ret[k++] = i + '0';
+            else if (len1 <= i && i < len1 + len2)
+                ret[k++] = i + 'A' - len1;
+            else if (len1 + len2 <= i && i < len1 + len2 + len3)
+                ret[k++] = i + 'a' - len2 - len1;
+            else
+                ;
         }
         ++i;
     }

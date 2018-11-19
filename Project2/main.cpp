@@ -105,7 +105,7 @@ void test2()
 	int m = strlen(x);
 	int n = strlen(y);
 	printf("m = %d\nn = %d\n", m, n);
-	printLCS(x, y, L, m, n);
+	printLCS(x, y, m, n, L);
 	//printf("lcs = %d\n", longest2(x, y, m, n));
 }
 
