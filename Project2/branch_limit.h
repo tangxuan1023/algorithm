@@ -47,7 +47,7 @@ public:
 	MaxHeap();
 	~MaxHeap();
 	void put(const HeapNode<double> *node);
-	void peekMax(HeapNode<double> *node);
+	void peek(HeapNode<double> *node);
 private:
 	HeapNode<double> *nodes;
 	int nextPlace;

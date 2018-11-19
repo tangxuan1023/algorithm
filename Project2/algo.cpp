@@ -70,7 +70,7 @@ int longest(char *x, char *y, int m, int n, int ** &L)
 
 /* 处理好L表格索引（由1开始）和x, y字符数组的下标之间（由0开始）的对应关系 */
 /* 最长子序列搜索方向（不同结果）如何对应设计 */
-void printLCS(char *x, char *y, int **L, int m, int n)
+void printLCS(char *x, char *y, int m, int n, int **L)
 {
 	int lcs = longest(x, y, m, n, L);
 	printf("lcs = %d\n", lcs);
@@ -130,7 +130,79 @@ int longest2(char *x, char *y, int m, int n)
 }
 
 
-/**/
+/* longest common substring */
+#define MAX(x,y) ((x) >(y))?(x):(y)
+
+int longest_sub(char *x, char *y, int m, int n, int ** &L)
+{
+    int lcs = 0;
+    //int **L = new int *[m + 1]();
+    //for (int i = 0; i <= m; i++) {
+    //    L[i] = new int[n + 1]();
+    //}
+
+    for (int i = 0; i <= m; i++) L[i][0] = 0;
+    for (int j = 0; j <= n; j++) L[0][j] = 0;
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (x[i - 1] == y[j - 1]) {
+                L[i][j] = L[i - 1][j - 1] + 1;
+                lcs = MAX(L[i][j], lcs);
+            }
+            else L[i][j] = 0;
+        }
+    }
+
+    // for (int i = 0; i <= m; i++) {
+    //     delete[] L[i];
+    //     L[i] = NULL;
+    // }
+    // delete[] L;
+    // L = NULL;
+
+    return lcs;
+}
+
+void printLCS_sub(char *x, char *y, int m, int n, int **L)
+{
+    L = new int *[m + 1]();
+    for (int i = 0; i <= m; i++) {
+        L[i] = new int[n + 1]();
+    }
+
+    int lcs = longest_sub(x, y, m, n, L);
+    printf("lcs = %d\n", lcs);
+    char *ret = new char[lcs + 1]();
+    int i = m, j = n, k = lcs;
+    int flag = 0;
+    for (i = m; i > 0; i--) {
+        for (j = n; j > 0; j--) {
+            if (L[i][j] == k) {
+                flag = 1;
+                break;
+            }
+        }
+        if (flag == 1) break;
+    }
+
+    printf("i = %d\t\tj = %d\n", i, j);
+    for (int pos = i; pos >= 1; pos--)
+        ret[(k--) - 1] = x[pos - 1];
+
+    printf("lcs = %d\n", lcs);
+    printf("%s\n", ret + k);
+
+    for (int i = 0; i <= m; i++) {
+        delete[] L[i];
+        L[i] = NULL;
+    }
+    delete[] L;
+    L = NULL;
+    delete[] ret;
+}
+
+
+/* 电路布线 */
 int getMNS(int π[], int n)
 {
 	// TODO(tangxuan): debug the code 

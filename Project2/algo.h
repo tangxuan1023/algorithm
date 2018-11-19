@@ -27,9 +27,11 @@ void HeapSort(int *arr, int n);
 
 void MatrixChain(int *p, int n, int **m, int **s);
 int longest(char *x, char *y, int m, int n, int **&L);
-void printLCS(char *x, char *y, int **L, int m, int n);
-
+void printLCS(char *x, char *y, int m, int n, int **L);
 int longest2(char *x, char *y, int m, int n);
+
+int longest_sub(char *x, char *y, int m, int n, int ** &L);
+void printLCS_sub(char *x, char *y, int m, int n, int **L);
 
 int getMNS(int ¦Ð[], int n);
 

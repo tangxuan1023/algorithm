@@ -117,6 +117,12 @@ MaxHeap::MaxHeap()
 MaxHeap::~MaxHeap()
 {
 	if (nodes) {
+		/*for (int i = 0; i < maxNumber; i++) {
+			if (nodes[i] != NULL) {
+				delete nodes[i];
+				nodes[i] = NULL;
+			}
+		}*/
 		delete[] nodes;
 		nodes = NULL;
 	}
@@ -173,7 +179,7 @@ void BackPack::descendSort(Element *arr, int len)
 void BackPack::addLiveNode(double up, double p, double w, int lev, PTNode *par, bool ch)
 {
 	PTNode *pt_node = new PTNode(par, ch);  // TODO(tangxuan): delete this space
-	HeapNode<double> *heap_node = &(HeapNode<double>(pt_node, up, p, w, lev)); // error: taking address of temporary 
+	HeapNode<double> *heap_node = new HeapNode<double>(pt_node, up, p, w, lev);
 	mpHeap->put(heap_node);
 }
 
