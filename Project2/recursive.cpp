@@ -8,7 +8,8 @@ int binarySearch(int *arr, int size, int key)
 	int low = 0;
 	int high = size - 1;
 	while (high >= low) {
-		int mid = (low + high) / 2;
+		//int mid = (low + high) / 2;
+        int mid = low + (high - low) / 2; // 当high和low同时为很大的数时，计算 high + low 会发生整数溢出的情况
 		if (arr[mid] == key) return mid;
 		else if (arr[mid] > key) high = mid - 1;
 		else low = mid + 1;
@@ -19,7 +20,8 @@ int binarySearch(int *arr, int size, int key)
 int binarySearch2(int *arr, int low, int high, int key)
 {
 	if (low > high) return -1;
-	int mid = (low + high) >> 1;
+	//int mid = (low + high) >> 1;
+    int mid = low + ((high - low) >> 1);
 	if (arr[mid] == key) return mid;
 	else if (arr[mid] > key) return binarySearch2(arr, low, mid - 1, key);
 	else return binarySearch2(arr, mid + 1, high, key);

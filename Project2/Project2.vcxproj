@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="backtrack.cpp" />
     <ClCompile Include="branch_limit.cpp" />
     <ClCompile Include="sort.cpp" />
     <ClCompile Include="recursive.cpp" />
@@ -119,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algo.h" />
+    <ClInclude Include="backtrack.h" />
     <ClInclude Include="branch_limit.h" />
     <ClInclude Include="union_find.h" />
   </ItemGroup>

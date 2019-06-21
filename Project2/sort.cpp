@@ -68,16 +68,15 @@ int partition(int *arr, int size)
 {
 	if (size < 2) return 0;
 	int key = arr[0];
-	int i = 1;//low;
-	int j = size - 1;//high + 1;
+	int i = 1;
+	int j = size - 1;
 
 	for (;;) {
-		//do j--; while (arr[j] > key);
 		while (arr[j] < key) j--; // 升降序控制
-		//do i++; while (i <= high && arr[i] < key);
-		while (i < size && arr[i] >= key) i++; // 升降序控制
+		while (arr[i] >= key && i < size) i++; // 升降序控制
 		if (i >= j) break;
-		swap<int>(arr[i], arr[j]);
+        swap<int>(arr[i], arr[j]);
+        i++; j--;  // 每两对数判断完成后，需要更新下标索引
 	}
 
 	swap<int>(arr[0], arr[j]);
@@ -179,5 +178,22 @@ void HeapSort(int *arr, int n)
 		// 调整，把剩余的n-1个元素整理成堆
 		AdjustDown(arr, 0, i);
 	}
+}
+
+void gnomeSort(int arr[], int n)
+{
+    int index = 0;
+
+    while (index < n) {
+        if (index == 0)  // 初始情况下，向前一步
+            index++;
+        if (arr[index] >= arr[index - 1]) // 如果两数顺序正确，向前一步
+            index++;
+        else {  // 顺序不正确，交换两数，并后退一步
+            swap(arr[index], arr[index - 1]);
+            index--;
+        }
+    }
+    return;
 }
 
